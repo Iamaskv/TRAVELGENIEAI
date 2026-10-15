@@ -1,0 +1,20 @@
+{
+  "name": "travelgenie-ai",
+  "version": "1.0.0",
+  "description": "TravelGenie AI — Your Personal AI Travel Agent",
+  "private": true,
+  "scripts": {
+    "client": "npm --prefix client run dev",
+    "server": "npm --prefix server run dev",
+    "test": "npm --prefix server run test",
+    "build": "npm --prefix client run build"
+  },
+  "keywords": [
+    "travel",
+    "ai",
+    "gemini",
+    "trip-planner"
+  ],
+  "author": "TravelGenie AI Team",
+  "license": "MIT"
+}
