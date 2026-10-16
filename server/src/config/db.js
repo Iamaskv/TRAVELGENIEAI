@@ -4,6 +4,11 @@ import { ENV } from './env.js';
 let isMongoConnected = false;
 
 export async function connectDB() {
+  if (mongoose.connection && mongoose.connection.readyState >= 1) {
+    isMongoConnected = true;
+    return true;
+  }
+
   if (!ENV.MONGODB_URI) {
     console.log('[DB] No MONGODB_URI provided. Running in high-reliability Memory Store mode.');
     return false;

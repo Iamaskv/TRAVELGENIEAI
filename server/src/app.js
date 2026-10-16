@@ -21,6 +21,14 @@ export function createApp() {
   app.use(express.json({ limit: '10mb' }));
   app.use(morgan('dev'));
 
+  // Ensure request paths starting without /api (e.g. from serverless rewrites) are handled cleanly
+  app.use((req, _res, next) => {
+    if (!req.url.startsWith('/api') && req.url !== '/') {
+      req.url = '/api' + req.url;
+    }
+    next();
+  });
+
   // Health check
   app.get('/api/health', (req, res) => {
     res.status(200).json({
