@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { api } from '../../services/api';
+import type { ITripPlan, IChatMessage } from '../../types';
 import {
   Sparkles,
   X,
@@ -8,18 +9,26 @@ import {
   User,
 } from 'lucide-react';
 
-export const AIChatDrawer = ({
+interface AIChatDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  plan: ITripPlan;
+  onPlanUpdate?: (updatedPlan: ITripPlan) => void;
+  onSwitchTab?: (tabName: string) => void;
+}
+
+export const AIChatDrawer: React.FC<AIChatDrawerProps> = ({
   isOpen,
   onClose,
   plan,
   onPlanUpdate,
   onSwitchTab,
 }) => {
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<IChatMessage[]>([
     {
       id: 'welcome_1',
       sender: 'assistant',
-      text: `Hello! I'm your AI Travel Agent for your upcoming trip to **${plan.destination}**. 
+      text: `Hello! I'm your AI Travel Agent for your upcoming trip to **${plan.destination || 'your destination'}**. 
 I have your complete transport timings, accommodation details, and budget allocations in mind. 
 
 How can I help optimize your trip today?`,
@@ -28,7 +37,7 @@ How can I help optimize your trip today?`,
   ]);
   const [inputText, setInputText] = useState('');
   const [isSending, setIsSending] = useState(false);
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const quickQuestions = [
     'Can you make this trip cheaper?',
@@ -44,10 +53,10 @@ How can I help optimize your trip today?`,
 
   if (!isOpen) return null;
 
-  const sendMessage = async (text) => {
+  const sendMessage = async (text: string) => {
     if (!text.trim() || isSending) return;
 
-    const userMsg = {
+    const userMsg: IChatMessage = {
       id: 'msg_user_' + Date.now(),
       sender: 'user',
       text,
@@ -63,14 +72,12 @@ How can I help optimize your trip today?`,
       setMessages((prev) => [...prev, response]);
 
       // Handle auto-action payload if returned by AI
-      if (response.actionPayload) {
+      if (response && response.actionPayload) {
         if (response.actionPayload.type === 'SWAP_TRANSPORT') {
-          // If user asked to switch to train or cheaper transport
           const cheaperTrain = plan.outboundOptions?.find(
-            (o) => o.mode === 'train' && (o.badge === 'Cheapest' || o.badge === 'Best Overall Value')
+            (o: any) => o.mode === 'train' && (o.badge === 'Cheapest' || o.badge === 'Best Overall Value')
           );
-          if (cheaperTrain && onPlanUpdate && cheaperTrain.id !== plan.selectedOutbound.id) {
-            // Apply swap in plan
+          if (cheaperTrain && onPlanUpdate && cheaperTrain.id !== plan.selectedOutbound?.id) {
             const updated = {
               ...plan,
               selectedOutbound: cheaperTrain,
@@ -79,8 +86,8 @@ How can I help optimize your trip today?`,
           }
           if (onSwitchTab) onSwitchTab('outbound');
         } else if (response.actionPayload.type === 'SWAP_ACCOMMODATION') {
-          const hostel = plan.accommodationOptions?.find((a) => a.propertyType === 'hostel');
-          if (hostel && onPlanUpdate && hostel.id !== plan.selectedAccommodation.id) {
+          const hostel = plan.accommodationOptions?.find((a: any) => a.propertyType === 'hostel');
+          if (hostel && onPlanUpdate && hostel.id !== plan.selectedAccommodation?.id) {
             const updated = {
               ...plan,
               selectedAccommodation: hostel,
@@ -121,7 +128,7 @@ How can I help optimize your trip today?`,
                 <span>TravelGenie Assistant</span>
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               </div>
-              <div className="text-[11px] text-slate-400">Contextual planner for {plan.destination}</div>
+              <div className="text-[11px] text-slate-400">Contextual planner for {plan.destination || 'your destination'}</div>
             </div>
           </div>
           <button
@@ -140,22 +147,25 @@ How can I help optimize your trip today?`,
               className={`flex items-start gap-2.5 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
             >
               <div
-                className={`w-7 h-7 rounded-lg shrink-0 flex items-center justify-center text-xs font-bold ${msg.sender === 'user' ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-emerald-400'
-                  }`}
+                className={`w-7 h-7 rounded-lg shrink-0 flex items-center justify-center text-xs font-bold ${
+                  msg.sender === 'user' ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-emerald-400'
+                }`}
               >
                 {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
               </div>
 
               <div
-                className={`max-w-[82%] p-3.5 rounded-2xl text-xs leading-relaxed ${msg.sender === 'user'
+                className={`max-w-[82%] p-3.5 rounded-2xl text-xs leading-relaxed ${
+                  msg.sender === 'user'
                     ? 'bg-emerald-600 text-white rounded-tr-none'
                     : 'bg-white border border-slate-200 text-slate-800 shadow-sm rounded-tl-none'
-                  }`}
+                }`}
               >
                 <div className="whitespace-pre-wrap">{msg.text}</div>
                 <div
-                  className={`text-[9px] mt-1.5 ${msg.sender === 'user' ? 'text-emerald-100 text-right' : 'text-slate-400'
-                    }`}
+                  className={`text-[9px] mt-1.5 ${
+                    msg.sender === 'user' ? 'text-emerald-100 text-right' : 'text-slate-400'
+                  }`}
                 >
                   {msg.timestamp}
                 </div>

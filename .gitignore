@@ -5,7 +5,5 @@ dist/
 .DS_Store
 Thumbs.db
 *.log
-.vercel
-
-
+*.tsbuildinfo
 .vercel
