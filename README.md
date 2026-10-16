@@ -178,3 +178,5 @@ Now open **[http://localhost:5173](http://localhost:5173)** in your browser!
 
 ## 📄 License
 MIT License. Built for modern travelers and explorers.
+#   T R A V E L G E N I E A I  
+ 
